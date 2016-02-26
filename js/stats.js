@@ -1,4 +1,4 @@
-
+/*
 $(document).ready(function() {
     var progress_map = {
         "TV"        : "tv",
@@ -44,3 +44,4 @@ $(document).ready(function() {
         pynab_alert("<strong>Error Loading Stats</strong>: " + msg);
     });
 });
+*/

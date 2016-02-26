@@ -14,7 +14,7 @@ function populate_search_cats () {
         // Check the query string for a category.
         var category = $.parseParams(window.location.search).c || -1;
 
-        $.each(data.caps.categories.category, function (index, cat) {
+        $.each(data.categories, function (index, cat) {
             if (category == cat.id) {
               $('#search_cat').append('<option selected value="' + cat.id + '">' + cat.name + '</option>');
             }

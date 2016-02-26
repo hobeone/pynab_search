@@ -1,5 +1,5 @@
 function save_setting (input) {
-    $.cookie(input.attr('id'), input.val(), { expires: 180 });
+    localStorage.setItem(input.attr('id'), input.val());
     if (input.attr('data-setting-cb')) {
       var cb_func = new Function(input.attr('data-setting-cb')+'();');
       cb_func(input);
@@ -10,7 +10,7 @@ $(document).ready(function() {
     // Get all the settings fields.
     $('#settings input').each(function (index) {
         // Populate the field from the cookie.
-        var value = $.cookie($(this).attr('id'));
+        var value = localStorage.getItem($(this).attr('id'));
         if (value) {
             $(this).val(value);
         }

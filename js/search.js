@@ -9,7 +9,6 @@ function result_table_init () {
     var header = $('<thead>').appendTo(results_table);
     var header_row = $('<tr>').appendTo(header);
     header_row.append(
-            $('<th>').text('Posted'),
             $('<th>').text('Published'),
             $('<th>').text('Title'),
             $('<th>').text('Category'),
@@ -25,16 +24,15 @@ function result_table_append (list, offset) {
         list = [list];
 
     $.each(list, function (index, element) {
-        var links = '<a href="' + element.link + '"><span class="glyphicon glyphicon-download"></span></a>';
+        var links = '<a href="' + element.link["#text"] + '"><span class="glyphicon glyphicon-download"></span></a>';
         links += sab_link_get_html(index + offset);
 
         $('<tr>').append(
-                $('<td>').text(jQuery.timeago(Date.parse(element.posted))),
-                $('<td>').text(jQuery.timeago(Date.parse(element.pubDate))),
-                $('<td>').text(element.title),
-                $('<td>').text(element.category),
-                $('<td>').text(element.size ? filesize(element.size) : 'Unknown'),
-                $('<td>').text(element.group),
+                $('<td>').text(jQuery.timeago(Date.parse(element.pubDate["#text"]))),
+                $('<td>').text(element.title["#text"]),
+                $('<td>').text(element.category["#text"]),
+                $('<td>').text(element.size ? filesize(parseInt(element.size["#text"])) : 'Unknown'),
+                $('<td>').text(element.group["#text"]),
                 $('<td>').html(links)
                 ).appendTo(results_table);
 
@@ -57,7 +55,7 @@ function result_table_populate(search_type, search_string, search_cat, search_of
         o      : 'json',
         limit  : 20,
         offset : search_offset,
-        apikey : $.cookie('apikey'),
+        apikey : localStorage.getItem('apikey'),
         q      : search_string,
     };
 
@@ -72,7 +70,7 @@ function result_table_populate(search_type, search_string, search_cat, search_of
 
     var url = pynab_url() + $.param(params);
 
-    $.getJSON(url, function (data) {
+    $.get(url, function (data) {
         $('#results_spinner').html('');
 
         // Check for an error from pynab.
@@ -88,11 +86,11 @@ function result_table_populate(search_type, search_string, search_cat, search_of
         if (search_offset == 0) {
             result_table_init();
         }
-
+        var j = xmlToJson(data);
         // If we have data, add it to the table and set last_search so infinite
         // scroll works again.
-        if (data.rss.channel.item) {
-            result_table_append(data.rss.channel.item, search_offset);
+        if (j.rss.channel.item) {
+            result_table_append(j.rss.channel.item, search_offset);
             last_search = params;
          }
     }).fail(function (data, status, msg) {
@@ -132,14 +130,22 @@ $(document).ready(function() {
 
     /* Handle 'enter' in the search bar. */
     $('#search_string').keypress(function(e) {
+      var squery = $('#search_string').val();
+      if (squery === undefined || squery === "") {
+        squery = "%"
+      }
         if (e.which == 13) {
-            do_search('search', $('#search_string').val(), $('#search_cat').val());
+            do_search('search', squery, $('#search_cat').val());
         }
     });
 
     /* Search button clicked. */
     $('#search_all_default').on('click', function(e) {
-        do_search('search', $('#search_string').val(), $('#search_cat').val());
+      var squery = $('#search_string').val();
+      if (squery === undefined || squery === "") {
+        squery = "%"
+      }
+        do_search('search', squery, $('#search_cat').val());
     });
 
     $('#search_string').focus();
@@ -173,6 +179,7 @@ $(document).ready(function() {
     // Check the query string for a search term.
     var query = $.parseParams(window.location.search).q;
     if (query) {
+
          $('#search_string').val(query);
          do_search('search', $('#search_string').val(), $('#search_cat').val());
     }
